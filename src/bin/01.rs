@@ -2,12 +2,10 @@ use itertools::Itertools;
 use std::collections::HashSet;
 
 pub fn part_one(input: &str) -> Option<u32> {
-    let numbers: HashSet<u32> = input
-        .lines()
-        .map(|n| n.parse().unwrap())
-        .collect();
+    let numbers: HashSet<u32> = input.lines().map(|n| n.parse().unwrap()).collect();
 
-    numbers.iter()
+    numbers
+        .iter()
         .filter_map(|&n| {
             let counter_part = 2020 - n;
             numbers.contains(&counter_part).then(|| n * counter_part)
@@ -16,10 +14,7 @@ pub fn part_one(input: &str) -> Option<u32> {
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
-    let numbers: HashSet<u32> = input
-        .lines()
-        .map(|n| n.parse().unwrap())
-        .collect();
+    let numbers: HashSet<u32> = input.lines().map(|n| n.parse().unwrap()).collect();
 
     numbers
         .iter()
