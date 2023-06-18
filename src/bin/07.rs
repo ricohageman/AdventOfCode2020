@@ -78,7 +78,12 @@ pub fn part_one(input: &str) -> Option<usize> {
         bags_to_visit.push_back(bag);
     }
 
-    Some(contains_shiny_gold.values().filter(|element| **element).count())
+    Some(
+        contains_shiny_gold
+            .values()
+            .filter(|element| **element)
+            .count(),
+    )
 }
 
 pub fn part_two(input: &str) -> Option<usize> {
@@ -89,7 +94,8 @@ pub fn part_two(input: &str) -> Option<usize> {
     let mut bags_to_visit = VecDeque::<Bag>::from_iter(bags.values().cloned());
 
     while let Some(bag) = bags_to_visit.pop_front() {
-        let result = rules.get(&bag)
+        let result = rules
+            .get(&bag)
             .unwrap()
             .iter()
             .map(|(other_bag, amount)| {

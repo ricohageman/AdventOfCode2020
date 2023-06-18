@@ -1,23 +1,23 @@
-use std::cmp::{max, min, Ordering};
 use itertools::Itertools;
+use std::cmp::{max, min, Ordering};
 use std::collections::{HashSet, VecDeque};
 
 fn solve_part_one(input: &str, preamble_size: usize) -> Option<usize> {
-    let input: Vec<usize> = input.lines()
+    let input: Vec<usize> = input
+        .lines()
         .map(|element| element.parse::<usize>().unwrap())
         .collect();
 
-    let mut previous_values: VecDeque<usize> = input.iter()
-        .take(preamble_size)
-        .copied()
-        .collect();
+    let mut previous_values: VecDeque<usize> = input.iter().take(preamble_size).copied().collect();
 
     let mut message = input.into_iter().skip(preamble_size);
 
     while let Some(next) = message.next() {
-        if !previous_values.iter()
+        if !previous_values
+            .iter()
             .tuple_combinations()
-            .any(|(a, b)| a + b == next) {
+            .any(|(a, b)| a + b == next)
+        {
             return Some(next);
         }
 
@@ -35,18 +35,20 @@ pub fn part_one(input: &str) -> Option<usize> {
 fn solve_part_two(input: &str, preamble_size: usize) -> Option<usize> {
     let target = solve_part_one(input, preamble_size)?;
 
-    let input: Vec<usize> = input.lines()
+    let input: Vec<usize> = input
+        .lines()
         .map(|element| element.parse::<usize>().unwrap())
         .collect();
 
-    input.iter()
+    input
+        .iter()
         .enumerate()
         .filter_map(|(index, &start)| {
             let mut total = start;
             let mut minimum = start;
             let mut maximum = start;
 
-            let mut remaining_values = &mut input[index + 1 ..].iter();
+            let mut remaining_values = &mut input[index + 1..].iter();
 
             while let Some(&next) = remaining_values.next() {
                 total += next;

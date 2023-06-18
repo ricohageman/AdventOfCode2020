@@ -1,11 +1,11 @@
-use std::collections::{HashMap, HashSet, VecDeque};
 use crate::Instruction::{Accumulator, Jump, NoOperation};
+use std::collections::{HashMap, HashSet, VecDeque};
 
 #[derive(Debug)]
 enum Instruction {
     Accumulator(isize),
     Jump(isize),
-    NoOperation(isize)
+    NoOperation(isize),
 }
 
 enum ProgramResult {
@@ -14,7 +14,8 @@ enum ProgramResult {
 }
 
 fn parse_input(input: &str) -> Vec<Instruction> {
-    input.lines()
+    input
+        .lines()
         .map(|line| {
             let mut data = line.split(" ");
             let instruction = data.next().unwrap();
@@ -24,7 +25,7 @@ fn parse_input(input: &str) -> Vec<Instruction> {
                 "nop" => NoOperation(value),
                 "acc" => Accumulator(value),
                 "jmp" => Jump(value),
-                _ => panic!("{instruction}")
+                _ => panic!("{instruction}"),
             }
         })
         .collect()
@@ -56,7 +57,7 @@ fn simulate(
     instructions: &Vec<Instruction>,
     accumulator: isize,
     index: isize,
-    executed_instructions: &mut HashSet<isize>
+    executed_instructions: &mut HashSet<isize>,
 ) -> ProgramResult {
     let mut index = index;
     let mut accumulator = accumulator;
@@ -70,7 +71,12 @@ fn simulate(
             return ProgramResult::Terminated(accumulator);
         }
 
-        step(instructions, &mut accumulator, &mut index, executed_instructions);
+        step(
+            instructions,
+            &mut accumulator,
+            &mut index,
+            executed_instructions,
+        );
     }
 }
 
@@ -79,11 +85,11 @@ pub fn part_one(input: &str) -> Option<isize> {
 
     match simulate(&instructions, 0, 0, &mut HashSet::new()) {
         ProgramResult::Terminated(_) => panic!(),
-        ProgramResult::InfiniteLoop(amount) => Some(amount)
+        ProgramResult::InfiniteLoop(amount) => Some(amount),
     }
 }
 
-pub fn part_two<>(input: &str) -> Option<isize> {
+pub fn part_two(input: &str) -> Option<isize> {
     let instructions = parse_input(input);
 
     let mut accumulator = 0;
@@ -94,24 +100,37 @@ pub fn part_two<>(input: &str) -> Option<isize> {
         match instructions[index as usize] {
             Accumulator(_) => {}
             Jump(_) => {
-                match simulate(&instructions, accumulator, index + 1, &mut executed_instructions.clone()) {
+                match simulate(
+                    &instructions,
+                    accumulator,
+                    index + 1,
+                    &mut executed_instructions.clone(),
+                ) {
                     ProgramResult::Terminated(amount) => return Some(amount),
                     ProgramResult::InfiniteLoop(_) => {}
                 }
             }
             NoOperation(amount) => {
-                match simulate(&instructions, accumulator, index + amount, &mut executed_instructions.clone()) {
+                match simulate(
+                    &instructions,
+                    accumulator,
+                    index + amount,
+                    &mut executed_instructions.clone(),
+                ) {
                     ProgramResult::Terminated(amount) => return Some(amount),
                     ProgramResult::InfiniteLoop(_) => {}
                 }
             }
         }
 
-        step(&instructions, &mut accumulator, &mut index, &mut executed_instructions);
+        step(
+            &instructions,
+            &mut accumulator,
+            &mut index,
+            &mut executed_instructions,
+        );
     }
 }
-
-
 
 fn main() {
     let input = &advent_of_code::read_file("inputs", 8);
