@@ -1,8 +1,6 @@
 use arrayvec::ArrayVec;
 use itertools::Itertools;
-use std::collections::VecDeque;
-
-struct Ticket();
+use rustc_hash::FxHashSet;
 
 fn parse_input(input: &str) -> (Vec<Vec<(usize, usize)>>, Vec<usize>, Vec<Vec<usize>>) {
     let mut input = input.split("\n\n");
@@ -76,6 +74,10 @@ pub fn part_one(input: &str) -> Option<usize> {
     )
 }
 
+pub fn solve_part_two(input: &str) -> Option<usize> {
+    part_two::<20>(input)
+}
+
 pub fn part_two<const SIZE: usize>(input: &str) -> Option<usize> {
     let (fields, ticket, nearby_tickets) = parse_input(input);
     assert_eq!(fields.len(), SIZE);
@@ -112,47 +114,54 @@ pub fn part_two<const SIZE: usize>(input: &str) -> Option<usize> {
         })
         .collect();
 
-    let mut complete_solution: Option<ArrayVec<usize, SIZE>> = None;
-    let mut queue: VecDeque<ArrayVec<usize, SIZE>> =
-        VecDeque::from_iter(valid_field_indices_per_index[0].iter().map(|index| {
-            let mut vec = ArrayVec::<usize, SIZE>::new();
-            vec.push(*index);
-            vec
-        }));
 
-    while let Some(assignment) = queue.pop_front() {
-        if assignment.is_full() {
-            complete_solution = Some(assignment);
-            break;
-        }
+    let mut complete_solution: ArrayVec<Option<usize>, SIZE> = ArrayVec::from([None; SIZE]);
 
-        valid_field_indices_per_index[assignment.len()]
+    let mut used_rule_indices: FxHashSet<usize> = FxHashSet::with_capacity_and_hasher(SIZE, Default::default());
+    let mut known_field_indices: FxHashSet<usize> = FxHashSet::with_capacity_and_hasher(SIZE, Default::default());
+
+    while complete_solution.iter().any(|index| index.is_none()) {
+        let (field_index, rule_index) = valid_field_indices_per_index
             .iter()
-            .filter(|index| !assignment.contains(index))
-            .for_each(|index| {
-                let mut assignment = assignment.clone();
-                assignment.push(*index);
-                queue.push_front(assignment);
-            });
+            .enumerate()
+            .filter(|(field_index, _)| !known_field_indices.contains(field_index))
+            .filter_map(|(field_index, valid_rule_indices)| {
+                let mut valid_unused_rules = valid_rule_indices.iter()
+                    .filter(|rule_index| !used_rule_indices.contains(rule_index))
+                    .peekable();
+                let potential_single_unused_rule = valid_unused_rules.next().unwrap();
+
+                if valid_unused_rules.peek().is_some() {
+                    return None;
+                }
+
+                Some((field_index, *potential_single_unused_rule))
+            })
+            .next()
+            .unwrap();
+
+        complete_solution[field_index] = Some(rule_index);
+        used_rule_indices.insert(rule_index);
+        known_field_indices.insert(field_index);
     }
 
-    complete_solution.map(|solution| {
-        solution
+    Some(
+        complete_solution
             .into_iter()
+            .map(|index| index.unwrap())
             .enumerate()
             .sorted_by_key(|(_, field_index)| *field_index)
             .take(6)
             .map(|(ticket_index, _)| ticket_index)
             .map(|index| ticket[index])
             .product()
-    })
+    )
 }
 
 fn main() {
     let input = &advent_of_code::read_file("inputs", 16);
     advent_of_code::solve!(1, part_one, input);
-    let result = part_two::<20>(input);
-    println!("{:?}", result);
+    advent_of_code::solve!(2, solve_part_two, input);
 }
 
 #[cfg(test)]
