@@ -114,11 +114,12 @@ pub fn part_two<const SIZE: usize>(input: &str) -> Option<usize> {
         })
         .collect();
 
-
     let mut complete_solution: ArrayVec<Option<usize>, SIZE> = ArrayVec::from([None; SIZE]);
 
-    let mut used_rule_indices: FxHashSet<usize> = FxHashSet::with_capacity_and_hasher(SIZE, Default::default());
-    let mut known_field_indices: FxHashSet<usize> = FxHashSet::with_capacity_and_hasher(SIZE, Default::default());
+    let mut used_rule_indices: FxHashSet<usize> =
+        FxHashSet::with_capacity_and_hasher(SIZE, Default::default());
+    let mut known_field_indices: FxHashSet<usize> =
+        FxHashSet::with_capacity_and_hasher(SIZE, Default::default());
 
     while complete_solution.iter().any(|index| index.is_none()) {
         let (field_index, rule_index) = valid_field_indices_per_index
@@ -126,7 +127,8 @@ pub fn part_two<const SIZE: usize>(input: &str) -> Option<usize> {
             .enumerate()
             .filter(|(field_index, _)| !known_field_indices.contains(field_index))
             .filter_map(|(field_index, valid_rule_indices)| {
-                let mut valid_unused_rules = valid_rule_indices.iter()
+                let mut valid_unused_rules = valid_rule_indices
+                    .iter()
                     .filter(|rule_index| !used_rule_indices.contains(rule_index))
                     .peekable();
                 let potential_single_unused_rule = valid_unused_rules.next().unwrap();
@@ -154,7 +156,7 @@ pub fn part_two<const SIZE: usize>(input: &str) -> Option<usize> {
             .take(6)
             .map(|(ticket_index, _)| ticket_index)
             .map(|index| ticket[index])
-            .product()
+            .product(),
     )
 }
 
